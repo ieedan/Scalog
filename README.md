@@ -36,3 +36,6 @@ var logger = new Logger(connString, "Logs",false);
 
 logger.LogInfo("Welcome to Scalog");
 ```
+
+### Logs are configured to be easy to sort by ERROR or INFO
+![image](https://user-images.githubusercontent.com/117548273/236574008-7d223374-4415-4b27-a3f9-16ac835ae6a5.png)
