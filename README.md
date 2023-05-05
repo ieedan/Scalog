@@ -25,7 +25,7 @@ logger.LogInfo("Welcome to Scalog");
 ```
 
 ### Scalog can also change its behavior based on the environment
-By setting the alwaysWriteToDatabase in the constructor it will now log to a file in development and to the database in development
+By setting the **alwaysWriteToDatabase** in the constructor it will now log to a file in development and to the database in development
 
 ```csharp
 using Scalog;
