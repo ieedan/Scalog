@@ -12,19 +12,12 @@ namespace Scalog
         private readonly bool _alwaysWriteToDatabase = false;
         private readonly string? _connectionString = null;
         private readonly string? _tableName = null;
+        private readonly bool _isDev = true;
         public bool WritingToDatabase
         {
             get
             {
-                return _alwaysWriteToDatabase || _connectionString != null && !isDev;
-            }
-        }
-        private static bool isDev
-        {
-            get
-            {
-                var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-                return string.IsNullOrEmpty(environment) || environment.ToLower() == "development";
+                return _alwaysWriteToDatabase || (_connectionString != null && !_isDev);
             }
         }
 
@@ -51,13 +44,21 @@ namespace Scalog
         /// <param name="connectionString"></param> If you leave the table name blank this needs privelages to CREATE
         /// <param name="tableName"></param> Leave this blank for Scalog to create a table for you
         /// <param name="alwaysWriteToDatabase"></param> Set this to false if you want to write to a database only when in production
-        public Logger(string connectionString, bool alwaysWriteToDatabase = true, string tableName = "Logs")
+        public Logger(string connectionString, string tableName = "Logs")
         {
-            if (!alwaysWriteToDatabase) _path = createPath();
-
-            _alwaysWriteToDatabase = alwaysWriteToDatabase;
+            _alwaysWriteToDatabase = true;
             _connectionString = connectionString;
             _tableName = tableName;
+            generateSQL();
+        }
+
+        public Logger(string connectionString, bool isDev, string tableName = "Logs")
+        {
+            _isDev = isDev;
+            _alwaysWriteToDatabase = false;
+            _connectionString = connectionString;
+            _tableName = tableName;
+            _path = createPath();
             generateSQL();
         }
 
