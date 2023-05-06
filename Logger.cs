@@ -12,6 +12,13 @@ namespace Scalog
         private readonly bool _alwaysWriteToDatabase = false;
         private readonly string? _connectionString = null;
         private readonly string? _tableName = null;
+        public bool WritingToDatabase
+        {
+            get
+            {
+                return _alwaysWriteToDatabase || _connectionString != null && !isDev;
+            }
+        }
         private static bool isDev
         {
             get
@@ -44,7 +51,7 @@ namespace Scalog
         /// <param name="connectionString"></param> If you leave the table name blank this needs privelages to CREATE
         /// <param name="tableName"></param> Leave this blank for Scalog to create a table for you
         /// <param name="alwaysWriteToDatabase"></param> Set this to false if you want to write to a database only when in production
-        public Logger(string connectionString, string tableName = "Logs", bool alwaysWriteToDatabase = true)
+        public Logger(string connectionString, bool alwaysWriteToDatabase = true, string tableName = "Logs")
         {
             if (!alwaysWriteToDatabase) _path = createPath();
 
@@ -54,6 +61,9 @@ namespace Scalog
             generateSQL();
         }
 
+        /// <summary>
+        /// Creates table and stored procedure
+        /// </summary>
         private async void generateSQL()
         {
             await createTable();
@@ -74,29 +84,28 @@ namespace Scalog
             return $"{fullPath}\\";
         }
 
-        public void LogError(string message)
+        public void LogError(string message, string type = "ERROR")
         {
-            var log = new Log(message, "ERROR");
+            var log = new Log(message, type);
             writeLog(log);
         }
 
-        public Task LogErrorAsync(string message)
+        public Task LogErrorAsync(string message, string type = "ERROR")
         {
-            var log = new Log(message, "ERROR");
+            var log = new Log(message, type);
             writeLog(log);
-
             return Task.CompletedTask;
         }
 
-        public void LogInfo(string message)
+        public void LogInfo(string message, string type = "INFO")
         {
-            var log = new Log(message, "INFO");
+            var log = new Log(message, type);
             writeLog(log);
         }
 
-        public Task LogInfoAsync(string message)
+        public Task LogInfoAsync(string message, string type = "INFO")
         {
-            var log = new Log(message, "INFO");
+            var log = new Log(message, type);
             writeLog(log);
 
             return Task.CompletedTask;
@@ -104,7 +113,7 @@ namespace Scalog
 
         private void writeLog(Log log)
         {
-            if (_alwaysWriteToDatabase || _connectionString != null && !isDev)
+            if (WritingToDatabase)
             {
                 writeToDatabase(log);
             }
@@ -129,6 +138,10 @@ namespace Scalog
             }
         }
 
+        /// <summary>
+        /// Uses stored procedure and Dapper to write the log to the database
+        /// </summary>
+        /// <param name="log"></param>
         private void writeToDatabase(Log log)
         {
             string procedureName = $"sp{_tableName}_NewLog";
@@ -167,7 +180,7 @@ namespace Scalog
         }
 
         /// <summary>
-        /// Gets a SQL string for creating a new table
+        /// Gets a SQL string for creating a new table query can be found @ /SQL/Querys/CreateTable
         /// </summary>
         /// <returns></returns>
         private string getCreateTableSQL()
@@ -175,7 +188,7 @@ namespace Scalog
             return $"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{_tableName}')\r\nBEGIN\r\n    CREATE TABLE [dbo].[{_tableName}](\r\n        [Id] [int] IDENTITY(1,1) NOT NULL,\r\n        [Date] datetime NOT NULL,\r\n        [Message] varchar(MAX) NOT NULL,\r\n        [Type] varchar(10) NOT NULL,\r\n        CONSTRAINT [PK_{_tableName}] PRIMARY KEY CLUSTERED \r\n        (\r\n            [Id] ASC\r\n        )WITH (\r\n            PAD_INDEX = OFF, \r\n            STATISTICS_NORECOMPUTE = OFF, \r\n            IGNORE_DUP_KEY = OFF, \r\n            ALLOW_ROW_LOCKS = ON, \r\n            ALLOW_PAGE_LOCKS = ON, \r\n            OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF\r\n        ) ON [PRIMARY]\r\n    ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]\r\nEND";
         }
         /// <summary>
-        /// Gets a SQL string for creating a procedure
+        /// Gets a SQL string for creating a procedure query can be found @ /SQL/Querys/CreateProcedure
         /// </summary>
         /// <returns></returns>
         private string getCreateProcedureSQL()
