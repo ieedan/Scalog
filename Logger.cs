@@ -39,11 +39,10 @@ namespace Scalog
         }
 
         /// <summary>
-        /// Enables logging to a SQL database
+        /// Enables logging to the database
         /// </summary>
-        /// <param name="connectionString"></param> If you leave the table name blank this needs privelages to CREATE
-        /// <param name="tableName"></param> Leave this blank for Scalog to create a table for you
-        /// <param name="alwaysWriteToDatabase"></param> Set this to false if you want to write to a database only when in production
+        /// <param name="connectionString"></param>
+        /// <param name="tableName"></param>
         public Logger(string connectionString, string tableName = "Logs")
         {
             _alwaysWriteToDatabase = true;
@@ -52,6 +51,12 @@ namespace Scalog
             generateSQL();
         }
 
+        /// <summary>
+        /// Enables logging to the database in production and to a local file in development
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <param name="isDev"></param>
+        /// <param name="tableName"></param>
         public Logger(string connectionString, bool isDev, string tableName = "Logs")
         {
             _isDev = isDev;
