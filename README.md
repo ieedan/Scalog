@@ -32,7 +32,7 @@ using Scalog;
 
 string connString = "yourConnectionStringHere";
 
-var logger = new Logger(connString, "Logs",false);
+var logger = new Logger(connString,false);
 
 logger.LogInfo("Welcome to Scalog");
 ```
