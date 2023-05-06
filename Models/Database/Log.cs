@@ -18,10 +18,6 @@ namespace Scalog.Models.Database
             Message = message;
             Type = type;
         }
-        public Log()
-        {
-            
-        }
         public override string ToString()
         {
             return $"[{Date.ToString()}] {Type} - {Message}";
