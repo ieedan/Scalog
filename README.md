@@ -39,3 +39,10 @@ logger.LogInfo("Welcome to Scalog");
 
 ### Logs are configured to be easy to sort by ERROR or INFO
 ![image](https://user-images.githubusercontent.com/117548273/236574008-7d223374-4415-4b27-a3f9-16ac835ae6a5.png)
+
+### Methods
+
+- `LogInfo(string message, string type = "INFO")` will log with the default type of "INFO"
+- `LogInfoAsync(string message, string type = "INFO")` will log with the default type of "INFO"
+- `LogError(string message, string type = "ERROR")` will log with the default type of "ERROR"
+- `LogErrorAsync(string message, string type = "ERROR")` will log with the default type of "ERROR"
