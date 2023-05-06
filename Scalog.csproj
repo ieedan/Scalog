@@ -1,9 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Scalog</Title>
+    <Authors>Aidan Bleser</Authors>
+    <Description>A logger built to make logging to a file or database easier than it should be.</Description>
+    <RepositoryUrl>https://github.com/ieedan/Scalog</RepositoryUrl>
+    <PackageTags>Logging</PackageTags>
+    <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>
