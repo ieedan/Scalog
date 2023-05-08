@@ -140,7 +140,6 @@ namespace Scalog
                 writeToLogFile(log);
             }
 
-            Console.WriteLine(log.ToString());
             Debug.WriteLine(log.ToString());
         }
 
