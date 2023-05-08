@@ -37,6 +37,23 @@ var logger = new Logger(connString,false);
 logger.LogInfo("Welcome to Scalog");
 ```
 
+### Dependency Injection
+Heres an example of how you might use it in you ASP.Net API.
+
+```csharp
+using Scalog;
+
+var builder = WebApplication.CreateBuilder(args);
+
+var connectionStrings = new ConnectionStrings();
+builder.Configuration.Bind("ConnectionStrings", connectionStrings);
+builder.Services.AddSingleton(connectionStrings);
+
+var logger = new Logger(connectionStrings.MyDatabase, builder.Environment.IsDevelopment());
+
+builder.Services.AddSingleton(logger);
+```
+
 ### Logs are configured to be easy to sort by ERROR or INFO
 ![image](https://user-images.githubusercontent.com/117548273/236574008-7d223374-4415-4b27-a3f9-16ac835ae6a5.png)
 
