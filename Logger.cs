@@ -90,28 +90,40 @@ namespace Scalog
             return $"{fullPath}\\";
         }
 
-        public void LogError(string message, string type = "ERROR")
+        public void LogError(object value, string type = "ERROR")
         {
-            var log = new Log(message, type);
+            // Will not log null values
+            if (value == null) return;
+
+            var log = new Log(value.ToString(), type);
             writeLog(log);
         }
 
-        public Task LogErrorAsync(string message, string type = "ERROR")
+        public Task LogErrorAsync(object value, string type = "ERROR")
         {
-            var log = new Log(message, type);
+            // Will not log null values
+            if (value == null) return Task.CompletedTask;
+
+            var log = new Log(value.ToString(), type);
             writeLog(log);
             return Task.CompletedTask;
         }
 
-        public void LogInfo(string message, string type = "INFO")
+        public void LogInfo(object value, string type = "INFO")
         {
-            var log = new Log(message, type);
+            // Will not log null values
+            if (value == null) return;
+
+            var log = new Log(value.ToString(), type);
             writeLog(log);
         }
 
-        public Task LogInfoAsync(string message, string type = "INFO")
+        public Task LogInfoAsync(object value, string type = "INFO")
         {
-            var log = new Log(message, type);
+            // Will not log null values
+            if (value == null) return Task.CompletedTask;
+
+            var log = new Log(value.ToString(), type);
             writeLog(log);
 
             return Task.CompletedTask;
@@ -127,6 +139,9 @@ namespace Scalog
             {
                 writeToLogFile(log);
             }
+
+            Console.WriteLine(log.ToString());
+            Debug.WriteLine(log.ToString());
         }
 
         private void writeToLogFile(Log log)

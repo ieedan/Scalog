@@ -12,7 +12,7 @@ namespace Scalog.Models.Database
         public DateTime Date { get; set; }
         public string? Message { get; set; }
         public string? Type { get; set; }
-        public Log(string message, string type)
+        public Log(string? message, string? type)
         {
             Date = DateTime.Now;
             Message = message;
