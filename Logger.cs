@@ -4,6 +4,8 @@ using Scalog.Models.Database;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Scalog
 {
@@ -13,12 +15,25 @@ namespace Scalog
         private readonly string? _connectionString = null;
         private readonly string? _tableName = null;
         private readonly bool _isDev = true;
+
+        /// <summary>
+        /// Specifies the type of file to be logged to. The format will not change between .log and .txt files. Default is .log;
+        /// </summary>
+        public FileType FileExtension { get; set; } = FileType.log;
+
+        /// <summary>
+        /// When true the timestamps on the logs will use UTC DateTime.UtcNow instead of DateTime.Now
+        /// </summary>
+        public bool UseUtc { get; set; } = false;
+
+        /// <summary>
+        /// When true the logger will log to the Debug.WriteLine() instead of Console.WriteLine().
+        /// The logger will still log to the file or database but this will be easier to access for debug mode.
+        /// </summary>
+        public bool LogToDebug { get; set; } = false;
         public bool WritingToDatabase
         {
-            get
-            {
-                return _alwaysWriteToDatabase || (_connectionString != null && !_isDev);
-            }
+            get { return _alwaysWriteToDatabase || (_connectionString != null && !_isDev); }
         }
 
         private readonly string? _path = null;
@@ -26,7 +41,14 @@ namespace Scalog
         {
             get
             {
-                return $"{_path}{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Year}.log";
+                if (UseUtc)
+                {
+                    return $"{_path}{DateTime.UtcNow.Month}-{DateTime.UtcNow.Day}-{DateTime.UtcNow.Year}.{FileExtension.ToString()}";
+                }
+                else
+                {
+                    return $"{_path}{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Year}.{FileExtension.ToString()}";
+                }
             }
         }
 
@@ -93,38 +115,51 @@ namespace Scalog
         public void LogError(object value, string type = "ERROR")
         {
             // Will not log null values
-            if (value == null) return;
+            if (value == null)
+                return;
 
-            var log = new Log(value.ToString(), type);
+            var log = new Log(value.ToString(), type, UseUtc);
             writeLog(log);
+
+            LoggedError?.Invoke(log);
         }
 
         public Task LogErrorAsync(object value, string type = "ERROR")
         {
             // Will not log null values
-            if (value == null) return Task.CompletedTask;
+            if (value == null)
+                return Task.CompletedTask;
 
-            var log = new Log(value.ToString(), type);
+            var log = new Log(value.ToString(), type, UseUtc);
             writeLog(log);
+
+            LoggedError?.Invoke(log);
+
             return Task.CompletedTask;
         }
 
         public void LogInfo(object value, string type = "INFO")
         {
             // Will not log null values
-            if (value == null) return;
+            if (value == null)
+                return;
 
-            var log = new Log(value.ToString(), type);
+            var log = new Log(value.ToString(), type, UseUtc);
             writeLog(log);
+
+            LoggedInfo?.Invoke(log);
         }
 
         public Task LogInfoAsync(object value, string type = "INFO")
         {
             // Will not log null values
-            if (value == null) return Task.CompletedTask;
+            if (value == null)
+                return Task.CompletedTask;
 
-            var log = new Log(value.ToString(), type);
+            var log = new Log(value.ToString(), type, UseUtc);
             writeLog(log);
+
+            LoggedInfo?.Invoke(log);
 
             return Task.CompletedTask;
         }
@@ -140,7 +175,14 @@ namespace Scalog
                 writeToLogFile(log);
             }
 
-            Debug.WriteLine(log.ToString());
+            if (LogToDebug)
+            {
+                Debug.WriteLine(log.ToString());
+            }
+            else
+            {
+                Console.WriteLine(log.ToString());
+            }
         }
 
         private void writeToLogFile(Log log)
@@ -149,7 +191,16 @@ namespace Scalog
             {
                 using (StreamWriter writer = new StreamWriter(Path, true))
                 {
-                    writer.WriteLine(log.ToString());
+                    switch (FileExtension)
+                    {
+                        // Define other file extension formatting behaviors here
+                        case (FileType.json):
+                            writer.WriteLine(JsonSerializer.Serialize(log));
+                            break;
+                        default:
+                            writer.WriteLine(log.ToString());
+                            break;
+                    }
                 }
             }
             catch (Exception ex)
@@ -157,6 +208,20 @@ namespace Scalog
                 Debug.WriteLine("Failed to write to log file: " + ex.Message);
             }
         }
+
+        public delegate void InfoLogged(Log log);
+
+        /// <summary>
+        /// Fires when info has been logged
+        /// </summary>
+        public event InfoLogged LoggedInfo;
+
+        public delegate void ErrorLogged(Log log);
+
+        /// <summary>
+        /// Fires when an error has been logged
+        /// </summary>
+        public event ErrorLogged LoggedError;
 
         /// <summary>
         /// Uses stored procedure and Dapper to write the log to the database
@@ -173,7 +238,7 @@ namespace Scalog
                     cnn.Query<Log>(procedureName, log, null, buffered: true, null, commandType);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
             }
@@ -207,6 +272,7 @@ namespace Scalog
         {
             return $"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{_tableName}')\r\nBEGIN\r\n    CREATE TABLE [dbo].[{_tableName}](\r\n        [Id] [int] IDENTITY(1,1) NOT NULL,\r\n        [Date] datetime NOT NULL,\r\n        [Message] varchar(MAX) NOT NULL,\r\n        [Type] varchar(10) NOT NULL,\r\n        CONSTRAINT [PK_{_tableName}] PRIMARY KEY CLUSTERED \r\n        (\r\n            [Id] ASC\r\n        )WITH (\r\n            PAD_INDEX = OFF, \r\n            STATISTICS_NORECOMPUTE = OFF, \r\n            IGNORE_DUP_KEY = OFF, \r\n            ALLOW_ROW_LOCKS = ON, \r\n            ALLOW_PAGE_LOCKS = ON, \r\n            OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF\r\n        ) ON [PRIMARY]\r\n    ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]\r\nEND";
         }
+
         /// <summary>
         /// Gets a SQL string for creating a procedure query can be found @ /SQL/Querys/CreateProcedure
         /// </summary>

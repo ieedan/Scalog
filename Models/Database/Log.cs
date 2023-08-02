@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,16 +13,16 @@ namespace Scalog.Models.Database
         public DateTime Date { get; set; }
         public string? Message { get; set; }
         public string? Type { get; set; }
-        public Log(string? message, string? type)
+
+        public Log(string? message, string? type, bool useUtc)
         {
-            Date = DateTime.Now;
+            Date = useUtc ? DateTime.UtcNow : DateTime.Now;
             Message = message;
             Type = type;
         }
-        public Log()
-        {
-            
-        }
+
+        public Log() { }
+
         public override string ToString()
         {
             return $"[{Date}] {Type} - {Message}";
