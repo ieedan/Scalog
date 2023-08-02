@@ -4,7 +4,9 @@ using Scalog.Models.Database;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Xml.Linq;
 
 namespace Scalog
 {
@@ -112,25 +114,25 @@ namespace Scalog
             return $"{fullPath}\\";
         }
 
-        public void LogError(object value, string type = "ERROR")
+        public void LogError(object value, string type = "ERROR", [CallerMemberName] string? name = null)
         {
             // Will not log null values
             if (value == null)
                 return;
 
-            var log = new Log(value.ToString(), type, UseUtc);
+            var log = new Log($"Called by: {name}" + value.ToString(), type, UseUtc);
             writeLog(log);
 
             LoggedError?.Invoke(log);
         }
 
-        public Task LogErrorAsync(object value, string type = "ERROR")
+        public Task LogErrorAsync(object value, string type = "ERROR", [CallerMemberName] string? name = null)
         {
             // Will not log null values
             if (value == null)
                 return Task.CompletedTask;
 
-            var log = new Log(value.ToString(), type, UseUtc);
+            var log = new Log($"Called by: {name}" + value.ToString(), type, UseUtc);
             writeLog(log);
 
             LoggedError?.Invoke(log);
