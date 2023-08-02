@@ -120,7 +120,7 @@ namespace Scalog
             if (value == null)
                 return;
 
-            var log = new Log($"Called by: {name}" + value.ToString(), type, UseUtc);
+            var log = new Log($"Called by: {name} - " + value.ToString(), type, UseUtc);
             writeLog(log);
 
             LoggedError?.Invoke(log);
@@ -132,7 +132,7 @@ namespace Scalog
             if (value == null)
                 return Task.CompletedTask;
 
-            var log = new Log($"Called by: {name}" + value.ToString(), type, UseUtc);
+            var log = new Log($"Called by: {name} - " + value.ToString(), type, UseUtc);
             writeLog(log);
 
             LoggedError?.Invoke(log);
