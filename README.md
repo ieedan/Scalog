@@ -61,5 +61,5 @@ builder.Services.AddSingleton(logger);
 
 - `LogInfo(string message, string type = "INFO")` will log with the default type of "INFO"
 - `LogInfoAsync(string message, string type = "INFO")` will log with the default type of "INFO"
-- `LogError(string message, string type = "ERROR")` will log with the default type of "ERROR"
-- `LogErrorAsync(string message, string type = "ERROR")` will log with the default type of "ERROR"
+- `LogError(string message, string type = "ERROR", [CallerMemberName] string? name = null)` will log with the default type of "ERROR"
+- `LogErrorAsync(string message, string type = "ERROR", [CallerMemberName] string? name = null)` will log with the default type of "ERROR"
