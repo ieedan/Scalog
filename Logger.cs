@@ -5,7 +5,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace Scalog
 {
@@ -50,6 +49,7 @@ namespace Scalog
                     return $"{_path}{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Year}.{FileExtension.ToString()}";
                 }
             }
+            private set { }
         }
 
         /// <summary>
